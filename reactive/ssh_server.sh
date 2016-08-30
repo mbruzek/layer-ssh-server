@@ -12,21 +12,26 @@ function install_ssh-server() {
 }
 
 @when 'ssh-server.installed'
-@when 'config.changed.port'
+@when 'config.changed.ports'
 function configure_port() {
-    local port=`config-get port`
-    status-set maintenance "Configuring ssh-server for ${port}"
-    local old_port=`grep -e "^Port " /etc/ssh/sshd_config | head -n 1 | cut -d ' ' -f 2`
-    close-port $old_port || true
-    # The /etc/ssh/sshd_config file contains keyword-argument pairs, one per 
-    # line. Lines starting  with ‘#’ and empty lines are interpreted as 
-    # comments. Arguments may optionally be enclosed in double quotes (") in
-    # order to represent arguments containing spaces.
-    sed -i -e "s/^Port .*$/Port ${port}/" /etc/ssh/sshd_config 
+    local ports=`config-get ports`
+    status-set maintenance "Configuring ssh-server for ${ports[@]}"
+    # Close the old ports.
+    local old_ports=(`grep -e "^Port" /tmp/sshd_config | cut -d ' ' -f 2`)
+    for port in ${old_ports[@]}; do
+        echo "Closing ${port}"
+        close-port $port || true
+    done
+    # Remove all instances of Port in the config file.
+    sed -i -e '/Port/d' /etc/ssh/sshd_config
+    for port in ${ports[@]}; do
+        echo "Port ${port}" >> /etc/ssh/sshd_config
+        open-port $port
+    done
+    # Reload the service and print the status.
     systemctl reload sshd 
     systemctl status sshd
-    open-port $port
-    status-set active "The ssh-server is listening to ${port}"
+    status-set active "The ssh-server is listening on ${ports[@]}"
 }
 
 reactive_handler_main

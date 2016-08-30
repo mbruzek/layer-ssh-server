@@ -1,7 +1,7 @@
 options:
-  port:
-    type: int
-    default: 3128
+  ports:
+    type: string
+    default: 22 3128
     description: |
-      The port for sshd to listen on to make connections. The default port is 
-      3128 a common proxy port.
+      The ports for sshd to listen on to make connections. The default ports 
+      are 22 3128 (a common proxy port). 
