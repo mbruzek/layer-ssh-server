@@ -1,0 +1,12 @@
+name: ssh-server
+summary: The openssh-server package listening on a specific port.
+maintainer: M Bruzek <mbruzek@gmail.com>
+description: |
+  There are several cases where you want an ssh server listening on a specific
+  port and this charm delivers that.
+tags:
+  - networking
+  - misc
+subordinate: false
+series:
+  - xenial
